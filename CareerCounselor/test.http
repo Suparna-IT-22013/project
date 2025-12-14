@@ -1,0 +1,7 @@
+### Career Counselor API Test
+POST http://localhost:8080/api/job/suggest
+Content-Type: application/json
+
+{
+  "skills": ["cp", "research", "lazy"]
+}

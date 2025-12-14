@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Career Path Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, slateblue, mediumpurple);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px lightgray;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid gray;
+    }
+    .skills {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .skills label {
+      background: whitesmoke;
+      padding: 10px;
+      border-radius: 5px;
+      display: block;
+    }
+    button {
+      display: block;
+      margin: auto;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 25px;
+      background: royalblue;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 20px;
+      display: none;
+      background: lavender;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    .job-item {
+      background: white;
+      padding: 10px;
+      border-left: 4px solid limegreen;
+      margin: 10px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+    .job-score {
+      background: limegreen;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Career Path Quiz</h2>
+  <form id="quizForm">
+    <label>Name* <input type="text" id="name" required></label>
+    <label>Age* <input type="number" id="age" required min="12"></label>
+    <label>Gender
+      <select id="gender">
+        <option value="">Select</option>
+        <option>Male</option>
+        <option>Female</option>
+      </select>
+    </label>
+
+    <h3>Skills & Interests</h3>
+    <div class="skills">
+      <label><input type="checkbox" value="cp"> Competitive Programming</label>
+      <label><input type="checkbox" value="ml"> Machine Learning</label>
+      <label><input type="checkbox" value="research"> Research</label>
+      <label><input type="checkbox" value="develop"> Software Development</label>
+      <label><input type="checkbox" value="memorize"> Memorizing</label>
+      <label><input type="checkbox" value="patient"> Patience</label>
+      <label><input type="checkbox" value="secure"> Job Security</label>
+      <label><input type="checkbox" value="language"> Multiple Languages</label>
+      <label><input type="checkbox" value="sports"> Sports</label>
+      <label><input type="checkbox" value="lazy"> Lazy / No Skill</label>
+    </div>
+    <button type="submit">Get Suggestions</button>
+  </form>
+
+  <div id="result"></div>
+</div>
+
+<script>
+  const skillToJobs = {
+    cp: ['Software Engineer', 'Competitive Programming Coach', 'Algorithm Specialist'],
+    ml: ['ML Engineer', 'AI Researcher', 'Data Scientist'],
+    research: ['Researcher', 'Academic Researcher', 'Data Scientist'],
+    develop: ['Web Developer', 'Mobile Developer', 'Software Engineer'],
+    memorize: ['BCS Cadre', 'Teacher', 'Lawyer'],
+    patient: ['BCS Cadre', 'Healthcare Professional', 'Teacher'],
+    secure: ['Government Job', 'BCS Cadre', 'Banking Sector'],
+    language: ['Interpreter', 'Translator', 'Language Teacher'],
+    sports: ['Sports Coach', 'Fitness Trainer', 'Athlete'],
+    lazy: ['Marriage', 'Social Media Influencer', 'Freelancer']
+  };
+
+  const jobIcons = {
+    'Software Engineer': '💻',
+    'Competitive Programming Coach': '🏆',
+    'Algorithm Specialist': '📐',
+    'ML Engineer': '🤖',
+    'AI Researcher': '🧠',
+    'Data Scientist': '📊',
+    'Researcher': '🔬',
+    'Academic Researcher': '📚',
+    'Web Developer': '🌐',
+    'Mobile Developer': '📱',
+    'Teacher': '👩‍🏫',
+    'Healthcare Professional': '👨‍⚕️',
+    'Government Job': '🏛️',
+    'BCS Cadre': '🎖️',
+    'Banking Sector': '🏦',
+    'Interpreter': '🗣️',
+    'Translator': '📝',
+    'Language Teacher': '📕',
+    'Sports Coach': '⚽',
+    'Fitness Trainer': '🏋️',
+    'Athlete': '🥇',
+    'Marriage': '💍',
+    'Social Media Influencer': '📱',
+    'Freelancer': '🧑‍💻',
+    'Lawyer': '⚖️'
+  };
+
+  const skillWeight = {
+    strong: 13,
+    medium: 8
+  };
+
+  const jobSkillStrength = {
+    'Software Engineer': { cp: 'strong', develop: 'medium', ml: 'medium' },
+    'ML Engineer': { ml: 'strong', research: 'medium', develop: 'medium' },
+    'AI Researcher': { ml: 'strong', research: 'strong' },
+    'Data Scientist': { ml: 'strong', research: 'strong' },
+    'Web Developer': { develop: 'strong' },
+    'Mobile Developer': { develop: 'strong' },
+    'Researcher': { research: 'strong' },
+    'Academic Researcher': { research: 'strong', memorize: 'medium' },
+    'Teacher': { memorize: 'strong', patient: 'strong' },
+    'Healthcare Professional': { patient: 'strong' },
+    'Government Job': { secure: 'strong' },
+    'BCS Cadre': { secure: 'strong', memorize: 'medium', patient: 'strong' },
+    'Banking Sector': { secure: 'medium' },
+    'Interpreter': { language: 'strong' },
+    'Translator': { language: 'strong' },
+    'Language Teacher': { language: 'medium' },
+    'Sports Coach': { sports: 'strong' },
+    'Fitness Trainer': { sports: 'medium' },
+    'Athlete': { sports: 'strong' },
+    'Marriage': { lazy: 'strong' },
+    'Social Media Influencer': { lazy: 'medium' },
+    'Freelancer': { lazy: 'medium' },
+    'Lawyer': { memorize: 'medium' }
+  };
+
+  document.getElementById('quizForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const age = document.getElementById('age').value.trim();
+    if (!name || !age) return alert("Please fill in all required fields.");
+
+    const selectedSkills = Array.from(document.querySelectorAll('input[type=checkbox]:checked')).map(cb => cb.value);
+    const jobScores = {};
+
+    Object.entries(jobSkillStrength).forEach(([job, skillsMap]) => {
+      let rawScore = 0;
+      selectedSkills.forEach(skill => {
+        if (skillsMap[skill]) rawScore += skillWeight[skillsMap[skill]];
+      });
+
+      if (rawScore > 0) {
+        const percent = Math.min(Math.round(60 + rawScore), 86); // capped at 86%
+        jobScores[job] = percent;
+      }
+    });
+
+    const sortedJobs = Object.entries(jobScores)
+            .map(([job, score]) => ({ job, score }))
+            .sort((a, b) => b.score - a.score);
+
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = `<h3>Results for ${name}:</h3>` +
+            (sortedJobs.length
+                    ? sortedJobs.map(r => `
+          <div class="job-item">
+            <div>${jobIcons[r.job] || '💼'} ${r.job}</div>
+            <div class="job-score">${r.score}% match</div>
+          </div>
+        `).join('')
+                    : '<p>No suitable job suggestions found.</p>');
+    resultDiv.style.display = 'block';
+  });
+</script>
+</body>
+</html>
